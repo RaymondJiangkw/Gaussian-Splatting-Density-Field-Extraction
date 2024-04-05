@@ -28,11 +28,11 @@ export_mrc_file("geometry.mrc", gaussians, 512, samples_per_voxel=8) # (512, 512
 
 ## Performance
 ### Time Complexity
-A `(512, 512, 512)` evaluation with $\sim10^5$ Gaussians takes ~$1$ minute with the CUDA implementation, and takes $\sim1$ day with the native PyTorch implementation.
+A `(512, 512, 512)` evaluation with $\sim10^5$ Gaussians takes $\sim1$ minute with the CUDA implementation, and takes $\sim1$ day with the native PyTorch implementation.
 
 ### Qualitative Results
 Extracted Mesh (level set = $15$) for `Chair` in the NeRF-Synthetic Dataset with the official Gaussian Splatting (took ~$8$ minutes on a NVIDIA RTX 3080 for $(512, 512, 512)$ with $8$ samples per voxel):
-![chair](./demo/chair.png)
+![chair](demo/chair.png)
 
 ## Method Explained
 For people who are interested, the scheme of algorithm is to first identify the boundary of the scene, and then divide the scene into `(resolution, resolution, resolution)` cubic grid. For each voxel, a point $x$ is sampled inside and therefore the density of voxel is given by $$\sum_{i=1}^{N}o_i\mathcal{G}_i(x).$$ In this case, we are using the density value at a single point to approximate the density distribution of the whole voxel, which can be sub-optimal. Therefore, a better choice is to put multiple different points inside the voxel, estimate their density values, and take the average as the density value of the voxel. However, the trade-off is that it will elongate the time consumption.
