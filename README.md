@@ -28,14 +28,14 @@ export_mrc_file("geometry.mrc", gaussians, 512, samples_per_voxel=8) # (512, 512
 
 ## Performance
 ### Time Complexity
-A `(512, 512, 512)` evaluation with ~$10^5$ Gaussians takes ~$1$ minute with the CUDA implementation, and takes ~$1$ day with the native PyTorch implementation.
+A `(512, 512, 512)` evaluation with $\sim10^5$ Gaussians takes ~$1$ minute with the CUDA implementation, and takes $\sim1$ day with the native PyTorch implementation.
 
 ### Qualitative Results
 Extracted Mesh (level set = $15$) for `Chair` in the NeRF-Synthetic Dataset with the official Gaussian Splatting (took ~$8$ minutes on a NVIDIA RTX 3080 for $(512, 512, 512)$ with $8$ samples per voxel):
 ![chair](./demo/chair.png)
 
 ## Method Explained
-For people who are interested, the scheme of algorithm is to first identify the boundary of the scene, and then divide the scene into `(resolution, resolution, resolution)` cubic grid. For each voxel, a point $x$ is sampled inside and therefore the density of voxel is given by $\sum_{i=1}^{N}o_i\mathcal{G}_i(x)$. In this case, we are using the density value at a single point to approximate the density distribution of the whole voxel, which can be sub-optimal. Therefore, a better choice is to put multiple different points inside the voxel, estimate their density values, and take the average as the density value of the voxel. However, the trade-off is that it will elongate the time consumption.
+For people who are interested, the scheme of algorithm is to first identify the boundary of the scene, and then divide the scene into `(resolution, resolution, resolution)` cubic grid. For each voxel, a point $x$ is sampled inside and therefore the density of voxel is given by $$\sum_{i=1}^{N}o_i\mathcal{G}_i(x).$$ In this case, we are using the density value at a single point to approximate the density distribution of the whole voxel, which can be sub-optimal. Therefore, a better choice is to put multiple different points inside the voxel, estimate their density values, and take the average as the density value of the voxel. However, the trade-off is that it will elongate the time consumption.
 
 The cuda implementation incorporates a small optimization for speed up. It estimates a valid range for each Gaussian kernel along an axis (the choice of axis doesn't matter. I choose `x`-axis in the implementation), which is similar to truncate the Gaussian into finite-support kernel in the 3DGS paper. Therefore, during the evaluation, for the queried point, if it does not fall into the valid range of a Gaussian kernel, the kernel can be directly skipped. This could result in slight differences with the estimated densities by the native PyTorch. The algorithm further sorts the Gaussian kernels based on the larger value of the valid range of the Gaussian kernel, so the evaluation for a point starts at the first Gaussian kernel, whose larger value of valid range is larger than the `x`-coordinate of the point.
 
