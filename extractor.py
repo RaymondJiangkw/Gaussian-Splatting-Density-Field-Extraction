@@ -220,4 +220,4 @@ def export_mrc_file(fname, gaussians,
         sigmas = torch.stack([ fn(gaussians, resolution, max_batch_size, False) for _ in range(samples_per_voxel) ]).mean(dim=0)
     
     with mrcfile.new_mmap(fname, overwrite=True, shape=sigmas.shape, mrc_mode=2) as mrc:
-        mrc.data[:] = sigmas
+        mrc.data[:] = np.flip(sigmas, 0)
